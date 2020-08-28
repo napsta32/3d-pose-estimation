@@ -4,7 +4,7 @@
 
 1. 2D Pose Estimation
 
-We use a custom 2D pose estimator to get all joints required for voleyball performance.
+We use PyraNet 2D pose estimator to get all joints for sports.
 
 2. 3D Pose Estimation
 
