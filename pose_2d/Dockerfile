@@ -1,7 +1,10 @@
-FROM nvidia/cuda:9.1-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
 # Install dependencies
 RUN apt-get update -y && \
+    apt-get install -y --allow-change-held-packages \
+            libnccl2=2.5.6-1+cuda9.0 \
+            libnccl-dev=2.5.6-1+cuda9.0 && \
     apt-get install -y \ 
             git \
             sudo \ 
@@ -11,7 +14,8 @@ RUN apt-get update -y && \
             python-dev \
             python-pip \
             gcc \
-            libhdf5-serial-dev
+            libhdf5-serial-dev \
+            libmatio-dev
 
 # Install Jupyter Notebook for iTorch
 RUN pip install --upgrade pip
@@ -45,5 +49,10 @@ RUN git clone https://github.com/NVIDIA/nccl.git && \
     make install && \
     luarocks install nccl
 
-# Set ~/torch as working directory
-WORKDIR /root/torch
+ENV CUDNN_PATH="/usr/lib/x86_64-linux-gnu/libcudnn.so.7"
+RUN git clone https://github.com/soumith/cudnn.torch.git -b R7 /root/cudnn.torch && \
+    cd /root/cudnn.torch && \
+    luarocks make cudnn-scm-1.rockspec
+
+WORKDIR /app
+
