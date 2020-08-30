@@ -89,6 +89,8 @@ function Trainer:train(epoch, dataloader)
          -- Copy input and target to the GPU
          self:copyInputs(sample)
 
+         print(self.input:type())
+
          local batchSize = self.input:size(1)
          local output = self.model:forward(self.input)
          local loss = self.criterion:forward(self.model.output, self.target)
