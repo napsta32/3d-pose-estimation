@@ -84,7 +84,7 @@ def main():
             if cfg.RUN_EFFICIENT:
                 del images, valids, labels, losses
 
-            if engine.local_rank == 0:
+            if not engine.distributed or engine.local_rank == 0:
                 if iteration % 20 == 0 or iteration == max_iter:
                     log_str = 'Iter:%d, LR:%.1e, ' % (
                         iteration, optimizer.param_groups[0]["lr"] / num_gpu)

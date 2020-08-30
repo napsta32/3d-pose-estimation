@@ -1,0 +1,13 @@
+# Datasets
+dataset/*/det_json
+dataset/*/gt_json
+
+# Generated files
+exps/*/log
+model_logs
+
+# Models
+lib/models
+
+# Compiled code
+__pycache__

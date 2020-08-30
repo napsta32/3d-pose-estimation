@@ -1,0 +1,3 @@
+# Datasets
+/dataset/*/det_json
+/dataset/*/gt_json
