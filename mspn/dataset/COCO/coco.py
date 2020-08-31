@@ -173,6 +173,9 @@ if __name__ == '__main__':
     dataset = load_dataset('COCO')
     coco = COCODataset(dataset, 'train')
     print(coco.data_num)
-    print(coco[500][0].shape)
-    for i in range(50):
+    for i in range(1):
+        data = coco[500]
+        print(data[0].shape)
+        print(data[1].shape)
+        print(data[2].shape)
         cv2.imwrite('train500-{}.png'.format(i), coco[500][0])
