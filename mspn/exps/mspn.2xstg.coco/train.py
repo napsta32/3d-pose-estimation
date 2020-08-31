@@ -73,13 +73,14 @@ def main():
             valids = valids.to(device)
             labels = labels.to(device)
 
-            scheduler.step()
             loss_dict = model(images, valids, labels)
             losses = sum(loss for loss in loss_dict.values())
 
             optimizer.zero_grad()
             losses.backward()
             optimizer.step()
+
+            scheduler.step()
 
             if cfg.RUN_EFFICIENT:
                 del images, valids, labels, losses

@@ -171,5 +171,8 @@ class COCODataset(JointsDataset):
 if __name__ == '__main__':
     from dataset.attribute import load_dataset
     dataset = load_dataset('COCO')
-    coco = COCODataset(dataset, 'val')
+    coco = COCODataset(dataset, 'train')
     print(coco.data_num)
+    print(coco[500][0].shape)
+    for i in range(50):
+        cv2.imwrite('train500-{}.png'.format(i), coco[500][0])
