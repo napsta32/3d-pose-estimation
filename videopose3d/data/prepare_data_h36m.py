@@ -19,7 +19,7 @@ from common.h36m_dataset import Human36mDataset
 from common.camera import world_to_camera, project_to_2d, image_coordinates
 from common.utils import wrap
 
-output_filename = 'data_3d_h36m'
+output_filename = 'data_3d_h36m_univ'
 output_filename_2d = 'data_2d_h36m_gt'
 subjects = ['S1', 'S5', 'S6', 'S7', 'S8', 'S9', 'S11']
 
@@ -118,10 +118,11 @@ if __name__ == '__main__':
         import cdflib
         
         for subject in subjects:
+            print('Reading data of subject "{}"'.format(subject))
             output[subject] = {}
-            file_list = glob(args.from_source_cdf + '/' + subject + '/MyPoseFeatures/D3_Positions/*.cdf')
-            assert len(file_list) == 30, "Expected 30 files for subject " + subject + ", got " + str(len(file_list))
-            for f in file_list:
+            file_list = glob(args.from_source_cdf + '/' + subject + '/MyPoseFeatures/D3_Positions_mono_universal/*.cdf')
+            # assert len(file_list) == 30, "Expected 30 files for subject " + subject + ", got " + str(len(file_list))
+            for i, f in enumerate(file_list):
                 action = os.path.splitext(os.path.basename(f))[0]
                 
                 if subject == 'S11' and action == 'Directions':
@@ -135,6 +136,8 @@ if __name__ == '__main__':
                 positions = hf['Pose'].reshape(-1, 32, 3)
                 positions /= 1000 # Meters instead of millimeters
                 output[subject][canonical_name] = positions.astype('float32')
+
+                print("Progress {}/{}".format(i+1, len(file_list)), end='\r')
         
         print('Saving...')
         np.savez_compressed(output_filename, positions_3d=output)

@@ -1,0 +1,7 @@
+# Ignore data files (too heavy)
+*.npz
+*.zip
+*.h5
+
+# Temp files
+.ipynb_checkpoints
