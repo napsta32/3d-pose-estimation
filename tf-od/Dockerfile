@@ -45,4 +45,5 @@ RUN wget http://download.tensorflow.org/models/object_detection/tf2/20200711/cen
 RUN tar -xf centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz
 RUN mv centernet_hg104_512x512_kpts_coco17_tpu-32/checkpoint object_detection/test_data/
 
+# Prepare code
 COPY detect-people.py .
