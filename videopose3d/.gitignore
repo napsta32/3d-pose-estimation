@@ -1,3 +1,6 @@
+# Generated files
+__MACOSX
+
 # Ignore data files (too heavy)
 *.npz
 *.zip
