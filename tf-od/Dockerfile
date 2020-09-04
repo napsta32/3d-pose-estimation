@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.2.0-gpu
+FROM tensorflow/tensorflow:2.2.0-gpu-jupyter
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -43,7 +43,9 @@ ENV TF_CPP_MIN_LOG_LEVEL 3
 # Download pretrained model
 RUN wget http://download.tensorflow.org/models/object_detection/tf2/20200711/centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz
 RUN tar -xf centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz
-RUN mv centernet_hg104_512x512_kpts_coco17_tpu-32/checkpoint object_detection/test_data/
+RUN mkdir -p /home/tensorflow/data/model/ && \
+    mv centernet_hg104_512x512_kpts_coco17_tpu-32/checkpoint /home/tensorflow/data/
 
-# Prepare code
-COPY detect-people.py .
+WORKDIR /home/tensorflow
+
+CMD [ "jupyter", "notebook", "--no-browser", "--port", "8090", "--ip", "0.0.0.0" ]
