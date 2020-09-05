@@ -1,5 +1,6 @@
 import os
 import pathlib
+import itertools
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -26,7 +27,7 @@ fexists = os.path.exists
 
 outfile = 'efficient-bb.npz'
 image_dir = '/root/data/images'
-subjects = reversed(['S1', 'S5', 'S6', 'S7', 'S8', 'S9', 'S11'])
+subjects = ['S1', 'S5', 'S6', 'S7', 'S8', 'S9', 'S11']
 cameras = ['54138969', '55011271', '58860488', '60457274']
 
 
@@ -97,32 +98,43 @@ def main():
                 images_filenames = os.listdir(pjoin(image_dir, subject, action, 'imageSequence', camera))
                 images_paths = [pjoin(image_dir, subject, action, 'imageSequence', camera, f) for f in images_filenames]
                 
-                i = 0
-                for image_path, image_filename in zip(images_paths, images_filenames):
-                    image_np = load_image_into_numpy_array(image_path)
-                    results = model(image_np)
-                    result = {key:value.numpy() for key,value in results.items()}
-                    
-                    scores = result['detection_scores'][0]
-                    boxes = result['detection_boxes'][0]
-                    labels = result['detection_classes'][0]
-                    
-                    person_scores = scores * [label == PERSON_LABEL for label in labels]
-                    person_boxes = [box for i, box in enumerate(boxes) if scores[i] > 0.5]
-                    
-                    # For demo only:
-                    # visualize_bboxes(image_np, result)
-                    
-                    bbs[camera].append({
-                        'image': image_filename,
-                        'scores': [score for score in person_scores if score > 0.5],
-                        'boxes': person_boxes
-                    })
+                for _, batch in itertools.groupby(range(len(images_paths)), lambda k: k//10):
+                    images = []
 
-                    i += 1
-                    print('Progress {}/{} ({:.2f}%)'.format(i, len(images_paths), float(i)/len(images_paths)*100), end="\r")
-                    pass
-                pass
+                    for i in batch:
+                        image_path = images_paths[i]
+                        image_filename = images_filenames[i]
+                        
+                        image_np = load_image_into_numpy_array(image_path)
+                        images.append(image_np)
+                        pass
+                    
+                    images_np = np.concatenate(images)
+
+                    print('Running predictions on {} images ({})'.format(len(images_np), images_np.shape))
+                    results = model(images_np)
+                    result = {key:value.numpy() for key,value in results.items()}
+                
+                    print('Processing boxes...')
+                    for i in batch:
+                        image_filename = images_filenames[i]
+
+                        scores = result['detection_scores'][i]
+                        boxes = result['detection_boxes'][i]
+                        labels = result['detection_classes'][i]
+                        
+                        person_scores = scores * [label == PERSON_LABEL for label in labels]
+                        person_boxes = [box for i, box in enumerate(boxes) if scores[i] > 0.5]
+                        
+                        # For demo only:
+                        # visualize_bboxes(image_np, result)
+                        
+                        bbs[camera].append({
+                            'image': image_filename,
+                            'scores': [score for score in person_scores if score > 0.5],
+                            'boxes': person_boxes
+                        })
+                        pass
             
             np.savez(pjoin(image_dir, subject, action, outfile), data=bbs)
             print('Saving: {}'.format(pjoin(image_dir, subject, action, outfile)))
