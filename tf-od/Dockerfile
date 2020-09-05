@@ -36,16 +36,6 @@ RUN python -m pip install .
 
 ENV TF_CPP_MIN_LOG_LEVEL 3
 
-# Download pretrained models
-RUN wget --quiet http://download.tensorflow.org/models/object_detection/tf2/20200711/centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz && \
-        tar -xf centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz && \
-        mkdir -p /root/data/centernet_hourglass104_512x512_kpts_coco17_tpu-32 && \
-        mv centernet_hg104_512x512_kpts_coco17_tpu-32/checkpoint /root/data/centernet_hourglass104_512x512_kpts_coco17_tpu-32/
-RUN wget --quiet http://download.tensorflow.org/models/object_detection/tf2/20200711/centernet_hg104_512x512_coco17_tpu-8.tar.gz && \
-        tar -xf centernet_hg104_512x512_coco17_tpu-8.tar.gz && \
-        mkdir -p /root/data/centernet_hourglass104_512x512_coco17_tpu-8 && \
-        mv centernet_hg104_512x512_coco17_tpu-8/checkpoint /root/data/centernet_hourglass104_512x512_coco17_tpu-8/
-
 WORKDIR /root
 RUN python -m pip install tf_slim
 
