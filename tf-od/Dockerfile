@@ -39,6 +39,7 @@ ENV TF_CPP_MIN_LOG_LEVEL 3
 WORKDIR /root
 RUN python -m pip install tf_slim
 
-
 # CMD [ "jupyter", "notebook", "--allow-root", "--no-browser", "--port", "8090", "--ip", "0.0.0.0" ]
+
+WORKDIR /root/project
 CMD [ "python", "extract-bb.py" ]

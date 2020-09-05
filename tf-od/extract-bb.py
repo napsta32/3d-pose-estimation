@@ -68,6 +68,7 @@ def get_labels():
             use_display_name=True)
     category_index = label_map_util.create_category_index(categories)
     label_map_dict = label_map_util.get_label_map_dict(label_map, use_display_name=True)
+    return label_map_dict
 
 def inferBoundingBox(image_path: str):
     image_np = load_image_into_numpy_array(image_path)
@@ -124,3 +125,5 @@ def main():
         pass
     print('Finished extracting bounding boxes')
 
+if __name__ == '__main__':
+    main()
