@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.2.0-gpu-jupyter
+FROM tensorflow/tensorflow:2.3.0-gpu-jupyter
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -20,32 +20,35 @@ RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     apt-get update -y && apt-get install google-cloud-sdk -y
 
-# Add new user to avoid running as root
-RUN useradd -ms /bin/bash tensorflow
-USER tensorflow
-WORKDIR /home/tensorflow
-
-# Get latest models version
-RUN git clone https://github.com/tensorflow/models.git
+WORKDIR /root
 
 # Compile protobuf configs
-RUN (cd /home/tensorflow/models/research/ && protoc object_detection/protos/*.proto --python_out=.)
-WORKDIR /home/tensorflow/models/research/
+RUN mkdir -p /root/models/research/
+COPY object_detection /root/models/research/object_detection
+RUN (cd /root/models/research/ && protoc object_detection/protos/*.proto --python_out=.)
+WORKDIR /root/models/research/
 
 RUN cp object_detection/packages/tf2/setup.py ./
-ENV PATH="/home/tensorflow/.local/bin:${PATH}"
+ENV PATH="/root/.local/bin:${PATH}"
 
 RUN python -m pip install -U pip
 RUN python -m pip install .
 
 ENV TF_CPP_MIN_LOG_LEVEL 3
 
-# Download pretrained model
-RUN wget http://download.tensorflow.org/models/object_detection/tf2/20200711/centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz
-RUN tar -xf centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz
-RUN mkdir -p /home/tensorflow/data/model/ && \
-    mv centernet_hg104_512x512_kpts_coco17_tpu-32/checkpoint /home/tensorflow/data/
+# Download pretrained models
+RUN wget --quiet http://download.tensorflow.org/models/object_detection/tf2/20200711/centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz && \
+        tar -xf centernet_hg104_512x512_kpts_coco17_tpu-32.tar.gz && \
+        mkdir -p /root/data/centernet_hourglass104_512x512_kpts_coco17_tpu-32 && \
+        mv centernet_hg104_512x512_kpts_coco17_tpu-32/checkpoint /root/data/centernet_hourglass104_512x512_kpts_coco17_tpu-32/
+RUN wget --quiet http://download.tensorflow.org/models/object_detection/tf2/20200711/centernet_hg104_512x512_coco17_tpu-8.tar.gz && \
+        tar -xf centernet_hg104_512x512_coco17_tpu-8.tar.gz && \
+        mkdir -p /root/data/centernet_hourglass104_512x512_coco17_tpu-8 && \
+        mv centernet_hg104_512x512_coco17_tpu-8/checkpoint /root/data/centernet_hourglass104_512x512_coco17_tpu-8/
 
-WORKDIR /home/tensorflow
+WORKDIR /root
+RUN python -m pip install tf_slim
 
-CMD [ "jupyter", "notebook", "--no-browser", "--port", "8090", "--ip", "0.0.0.0" ]
+
+# CMD [ "jupyter", "notebook", "--allow-root", "--no-browser", "--port", "8090", "--ip", "0.0.0.0" ]
+CMD [ "python", "extract-bb.py" ]
