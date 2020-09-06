@@ -89,10 +89,14 @@ def main():
     for subject in subjects:
         actions = os.listdir(pjoin(image_dir, subject))
         for action in actions:
+            if action == 'MySegmentsMat':
+                continue
             if fexists(pjoin(image_dir, subject, action, outfile)):
                 continue
             bbs = {camera: [] for camera in cameras}
             for camera in cameras:
+                if subject == 'S11' and action == 'Directions-2' and camera == '54138969': # This video is missing
+                    continue
                 print('Processing {} / {} camera {}...'.format(subject, action, camera))
                 images_filenames = os.listdir(pjoin(image_dir, subject, action, 'imageSequence', camera))
                 images_paths = [pjoin(image_dir, subject, action, 'imageSequence', camera, f) for f in images_filenames]
@@ -112,11 +116,23 @@ def main():
                     
                     # For demo only:
                     # visualize_bboxes(image_np, result)
+
+                    scaled_boxes = []
+                    for box in person_boxes:
+                        x1, y1, x2, y2 = box
+                        x1 *= image_np.shape[1]
+                        x2 *= image_np.shape[1]
+                        y1 *= image_np.shape[2]
+                        y2 *= image_np.shape[2]
+
+                        scaled_boxes.append([x1, y1, x2, y2])
                     
                     bbs[camera].append({
                         'image': image_filename,
-                        'scores': [score for score in person_scores if score > 0.5],
-                        'boxes': person_boxes
+                        'scores': np.array([score for score in person_scores if score > 0.5]),
+                        'boxes': np.array(scaled_boxes),
+                        'height': image_np.shape[1],
+                        'width': image_np.shape[2],
                     })
 
                     i += 1
