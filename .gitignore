@@ -1,3 +1,4 @@
 .vscode
 __pycache__
 tf-od/object_detection/test_data/checkpoint
+.ipynb_checkpoints
