@@ -164,6 +164,7 @@ for subject_idx, subject in enumerate(retval['subject_names']):
     for action_idx, action in enumerate(retval['action_names']):
         action_path = os.path.join(subject_path, action, 'imageSequence')
         if not os.path.isdir(action_path):
+            print('trying action')
             raise FileNotFoundError(action_path)
 
         for camera_idx, camera in enumerate(retval['camera_names']):
