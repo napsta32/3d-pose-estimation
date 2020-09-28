@@ -26,7 +26,7 @@ fexists = os.path.exists
 
 outfile = 'efficient-bb.npz'
 image_dir = '/root/data/images'
-subjects = reversed(['S1', 'S5', 'S6', 'S7', 'S8', 'S9', 'S11'])
+subjects = ['S1', 'S5', 'S6', 'S7', 'S8', 'S9', 'S11']
 cameras = ['54138969', '55011271', '58860488', '60457274']
 
 

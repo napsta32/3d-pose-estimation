@@ -42,4 +42,4 @@ RUN python -m pip install tf_slim
 # CMD [ "jupyter", "notebook", "--allow-root", "--no-browser", "--port", "8090", "--ip", "0.0.0.0" ]
 
 WORKDIR /root/project
-CMD [ "python", "-u", "extract-bb.py" ]
+CMD [ "python", "-u", "extract-bb.py", "2>", "err.log" ]
