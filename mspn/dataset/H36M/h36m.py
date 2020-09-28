@@ -13,7 +13,7 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 
 
-class COCODataset(JointsDataset):
+class H36MDataset(JointsDataset):
 
     def __init__(self, DATASET, stage, transform=None):
         super().__init__(DATASET, stage, transform)
@@ -62,7 +62,7 @@ class COCODataset(JointsDataset):
 
                 img_name = coco.imgs[img_id]['file_name']
                 prefix = 'val2014' if 'val' in img_name else 'train2014'
-                img_path = os.path.join('/data/COCO/images', prefix,
+                img_path = os.path.join(self.cur_dir, 'images', prefix,
                         img_name)
 
                 bbox = np.array(ann['bbox'])
@@ -102,7 +102,7 @@ class COCODataset(JointsDataset):
 
                 img_id = det['image_id']
                 img_name = 'COCO_val2014_000000%06d.jpg' % img_id 
-                img_path = os.path.join('/data/COCO/images', 'val2014',
+                img_path = os.path.join(self.cur_dir, 'images', 'val2014',
                         img_name)
 
                 bbox = np.array(det['bbox'])

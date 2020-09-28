@@ -1,6 +1,8 @@
 # Datasets
 dataset/*/det_json
 dataset/*/gt_json
+*.c3d
+*.csv
 
 # Generated files
 exps/*/log

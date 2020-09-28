@@ -52,7 +52,7 @@ class Config:
 
     MODEL.DEVICE = 'cuda'
 
-    MODEL.WEIGHT = osp.join(ROOT_DIR, 'lib/models/resnet-50_rename.pth')
+    MODEL.WEIGHT = osp.join(ROOT_DIR, 'lib/models/mspn_2xstg_coco.pth')
 
     # -------- Training Config -------- #
     SOLVER = edict()

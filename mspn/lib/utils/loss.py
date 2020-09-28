@@ -48,9 +48,11 @@ class JointsL2Loss(nn.Module):
 
 
 if __name__ == '__main__':
-    a = torch.ones(1, 17, 12, 12)
-    b = torch.ones(1, 17, 12, 12)
-    c = torch.ones(1, 17, 1) * 2
+    # Lets assume error function works the same for any dimension of input tensor
+
+    a = torch.ones(1, 18, 12, 12)
+    b = torch.ones(1, 18, 12, 12)
+    c = torch.ones(1, 18, 1) * 2
     loss = JointsL2Loss()
     # loss = JointsL2Loss(has_ohkm=True)
     device = torch.device('cuda')

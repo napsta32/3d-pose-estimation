@@ -13,6 +13,11 @@ Existing pose estimation approaches fall into two categories: single-stage and m
 
 The resulting method establishes the new state-of-the-art on both MS COCO and MPII Human Pose dataset, justifying the effectiveness of a multi-stage architecture.
 
+## Files Location
+
+* **Bounding boxes:** `~/datasets/h36m/extra/bboxes-Human36M-GT.npy`
+* **Images:** `~/datasets/h36m/processed/*/*/imageSequence-undistorted/**`
+
 ## Results
 
 ### Results on COCO val dataset
