@@ -159,7 +159,8 @@ class JointsDataset(Dataset):
                         joints, valid, kernel=self.gaussian_kernels[i])
             labels = torch.from_numpy(labels).float()
 
-            return img, valid, labels
+            # return img, valid, labels
+            return img, valid, joints
         else:
             return img, score, center, scale, img_id
 

@@ -168,14 +168,38 @@ class COCODataset(JointsDataset):
         return img
 
 
+def __save_img(imgfile: str, joints, outfile: str):
+    img = mpimg.imread(imgfile)
+    
+    fig, ax = plt.subplots()
+    fig.set_figheight(30)
+    fig.set_figwidth(20)
+    
+    ax.imshow(img)
+    ax.scatter(joints[:,0], joints[:,1])
+    for i in range(joints.shape[0]):
+        ax.text(joints[i, 0], joints[i, 1], str(i), size=16, color='green')
+        pass
+
+    plt.savefig(outfile)
+
 if __name__ == '__main__':
     from dataset.attribute import load_dataset
+    ###
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    from matplotlib.lines import Line2D
+    ###
+
     dataset = load_dataset('COCO')
     coco = COCODataset(dataset, 'train')
     print(coco.data_num)
-    for i in range(1):
-        data = coco[500]
+    samples = [0, 3, 59, 300, 500]
+    for i, x in enumerate(samples):
+        imgfile = 'train{}-{}.png'.format(x, i)
+        data = coco[x]
         print(data[0].shape)
         print(data[1].shape)
         print(data[2].shape)
-        cv2.imwrite('train500-{}.png'.format(i), coco[500][0])
+        cv2.imwrite(imgfile, data[0])
+        __save_img(imgfile, data[2], 'markers-{}.png'.format(x))

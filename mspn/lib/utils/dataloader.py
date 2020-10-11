@@ -13,6 +13,7 @@ from cvpack.dataset import torch_samplers
 from dataset.attribute import load_dataset
 from dataset.COCO.coco import COCODataset
 from dataset.MPII.mpii import MPIIDataset
+from dataset.H36M.h36m import H36MDataset
 
 
 def get_train_loader(
