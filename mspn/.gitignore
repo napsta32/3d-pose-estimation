@@ -1,6 +1,7 @@
 # Datasets
 dataset/*/det_json
 dataset/*/gt_json
+dataset/*/gt
 *.c3d
 *.csv
 

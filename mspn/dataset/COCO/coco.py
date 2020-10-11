@@ -201,5 +201,6 @@ if __name__ == '__main__':
         print(data[0].shape)
         print(data[1].shape)
         print(data[2].shape)
+        print(data[3].shape)
         cv2.imwrite(imgfile, data[0])
-        __save_img(imgfile, data[2], 'markers-{}.png'.format(x))
+        __save_img(imgfile, data[3], 'markers-{}.png'.format(x))

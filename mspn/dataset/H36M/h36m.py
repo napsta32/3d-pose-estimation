@@ -7,6 +7,7 @@ import cv2
 import json
 import numpy as np
 import os
+import h5py
 
 from dataset.JointsDataset import JointsDataset
 
@@ -15,25 +16,61 @@ class H36MDataset(JointsDataset):
 
     def __init__(self, DATASET, stage, transform=None):
         super().__init__(DATASET, stage, transform)
-        self.cur_dir = os.path.split(os.path.realpath(__file__))[0]
+        if self.stage == 'train':
+            self.subjects = DATASET.TRAIN.SUBJECTS
+        else:
+            self.subjects = DATASET.TEST.SUBJECTS
 
-        self.train_gt_file = 'train_val_minus_minival_2014.json'
-        self.train_gt_path = os.path.join(self.cur_dir, 'gt_json',
-                self.train_gt_file)
+        self.bb = np.load('/data/H36M/bb/bboxes-Human36M-GT.npy', allow_pickle=True).item()
 
-        self.val_gt_file = 'minival_2014.json'
-        self.val_gt_path = os.path.join(self.cur_dir, 'gt_json',
-                self.val_gt_file)
-        self.val_det_file = 'minival_2014_det.json'
-        self.val_det_path = os.path.join(self.cur_dir, 'det_json',
-                self.val_det_file)
+        self.data = list()
+        for subject in self.subjects:
+            subject_dir = '/data/H36M/images/{}'.format(subject)
+            actions = sorted(os.listdir(subject_dir)) # Adding sorted for consistency
+            print('Loading metadata for subject {} (0/{})'.format(subject, len(actions)), end='\r')
 
-        self.test_det_file = ''
-        self.test_det_path = os.path.join(self.cur_dir, 'det_json',
-                self.test_det_file)
+            subject_data = list()
+            for i, action in enumerate(actions):
+                if action == 'MySegmentsMat':
+                    continue
+                action_dir = os.path.join(subject_dir, action)
+                annot_file = os.path.join(action_dir, 'annot.h5')
+                annot = h5py.File(annot_file, 'r')
+                subject_data += self._get_action_data(subject, action, action_dir, annot, len(self.data) + len(subject_data))
+                print('Loading metadata for subject {} ({}/{})'.format(subject, i+1, len(actions)), end='\r')
+            print()
+            np.savez('/app/dataset/H36M/gt/{}.npz'.format(subject), data=subject_data)
+            self.data += subject_data
 
-        self.data = self._get_data()
         self.data_num = len(self.data)
+
+    def _get_action_data(self, subject, action, action_dir, annot, min_id):
+        data = list()
+
+        for i, frame in enumerate(annot['frame']):
+            camera = str(annot['camera'][i])
+            pose2d = annot['pose']['2d'][i]
+            if len(self.bb[subject][action][camera]) < frame:
+                # No more data to show - It looks like an error, hope it doesn't happen
+                print('no more data to show ({}/{})'.format(len(self.bb[subject][action][camera]), frame))
+                continue
+            bbox = self.bb[subject][action][camera][frame-1]
+            x1, y1, x2, y2 = (bbox[0], bbox[1], bbox[2], bbox[3])
+            markers =  [0, 1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 17, 18, 19, 25, 26, 27]
+
+            img_id = '{}'.format(min_id + i)
+            img_path = os.path.join(action_dir, 'imageSequence-undistorted', camera, 'img_%06d.jpg' % (frame,))
+            joints = pose2d[markers]
+            center, scale = self._bbox_to_center_and_scale((x1, y1, x2-x1, y2-y1))
+
+            data.append(dict(img_id=img_id,
+                img_path=img_path,
+                joints=joints,
+                center=center,
+                scale=scale,
+            ))
+        
+        return data
 
     def _get_data(self):
         data = list()
@@ -163,6 +200,7 @@ class H36MDataset(JointsDataset):
 
         return img
 
+# Manual testing util
 def __save_img(imgfile: str, joints, outfile: str):
     img = mpimg.imread(imgfile)
     
@@ -178,6 +216,7 @@ def __save_img(imgfile: str, joints, outfile: str):
 
     plt.savefig(outfile)
 
+# Manual testing
 if __name__ == '__main__':
     from dataset.attribute import load_dataset
     ###
@@ -186,15 +225,16 @@ if __name__ == '__main__':
     from matplotlib.lines import Line2D
     ###
 
-    dataset = load_dataset('COCO')
-    coco = COCODataset(dataset, 'train')
-    print(coco.data_num)
-    samples = [0, 10000, 33000, 900000, 100000]
+    dataset = load_dataset('H36M')
+    h36m = H36MDataset(dataset, 'train')
+    print(h36m.data_num)
+    samples = [0, 70000, 433000, 190000, 600000]
+    # samples = [0]
     for i, x in enumerate(samples):
         imgfile = 'train{}-{}.png'.format(x, i)
-        data = coco[x]
+        data = h36m[x]
         print(data[0].shape)
         print(data[1].shape)
-        print(data[2].shape)
+        print(data[3].shape)
         cv2.imwrite(imgfile, data[0])
-        __save_img(imgfile, data[2], 'markers-{}.png'.format(x))
+        __save_img(imgfile, data[3], 'markers-{}.png'.format(x))

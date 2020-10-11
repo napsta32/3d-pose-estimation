@@ -29,6 +29,7 @@ RUN conda install numpy matplotlib scipy Cython
 RUN conda install -c anaconda pytorch-gpu
 RUN conda install -c pytorch torchvision
 RUN conda install -c conda-forge opencv
+RUN conda install -c anaconda h5py
 
 # Set coco workdir
 WORKDIR /root/app

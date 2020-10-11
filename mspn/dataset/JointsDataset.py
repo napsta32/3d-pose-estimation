@@ -66,6 +66,7 @@ class JointsDataset(Dataset):
 
         img_id = d['img_id']
         img_path = d['img_path']
+        print(img_path)
 
         data_numpy = cv2.imread(img_path, cv2.IMREAD_COLOR)
 
@@ -160,7 +161,7 @@ class JointsDataset(Dataset):
             labels = torch.from_numpy(labels).float()
 
             # return img, valid, labels
-            return img, valid, joints
+            return img, valid, labels, joints
         else:
             return img, score, center, scale, img_id
 

@@ -23,6 +23,8 @@ class H36M:
     COLOR_RGB = False
 
     TRAIN = edict()
+    TRAIN.SUBJECTS = ['S1', 'S5', 'S6', 'S7', 'S8']
+    # TRAIN.SUBJECTS = ['S1']
     TRAIN.BASIC_EXTENTION = 0.05
     TRAIN.RANDOM_EXTENTION = True
     TRAIN.X_EXTENTION = 0.6 
@@ -41,6 +43,7 @@ class H36M:
     TRAIN.GAUSSIAN_KERNELS = [(15, 15), (11, 11), (9, 9), (7, 7), (5, 5)]
 
     TEST = edict()
+    TEST.SUBJECTS = ['S9', 'S11']
     TEST.FLIP = True
     TEST.X_EXTENTION = 0.01 * 9.0
     TEST.Y_EXTENTION = 0.015 * 9.0
@@ -139,4 +142,6 @@ def load_dataset(name):
         dataset = COCO()
     elif name == 'MPII':
         dataset = MPII()
+    elif name == 'H36M':
+        dataset = H36M()
     return dataset
