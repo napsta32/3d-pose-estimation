@@ -9,10 +9,13 @@ class H36M:
     NAME = 'H36M'
 
     KEYPOINT = edict()
-    KEYPOINT.NUM = 17
+    KEYPOINT.NUM = 18
     KEYPOINT.FLIP_PAIRS = [[1, 5], [2, 6], [3, 7], [4, 8], [15, 12], [16, 13], [17, 14]]
     KEYPOINT.UPPER_BODY_IDS = [0, 1, 5, 9, 10, 11, 12, 13, 14, 15, 16, 17]
     KEYPOINT.LOWER_BODY_IDS = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    # KEYPOINT.FLIP_PAIRS = [[0, 4], [1, 5], [2, 6], [3, 7], [14, 11], [15, 12], [16, 13]]
+    # KEYPOINT.UPPER_BODY_IDS = [0, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    # KEYPOINT.LOWER_BODY_IDS = [0, 1, 2, 3, 4, 5, 6, 7]
     KEYPOINT.LOAD_MIN_NUM = 1
 
     INPUT_SHAPE = (256, 192) # height, width

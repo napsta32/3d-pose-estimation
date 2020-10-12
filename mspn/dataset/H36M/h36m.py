@@ -26,6 +26,14 @@ class H36MDataset(JointsDataset):
         self.data = list()
         for subject in self.subjects:
             subject_dir = '/data/H36M/images/{}'.format(subject)
+            cache_file = '/app/dataset/H36M/gt/{}.npz'.format(subject)
+
+            if os.path.exists(cache_file):
+                print('Loading metadata for subject {}'.format(subject))
+                cache = np.load(cache_file, allow_pickle=True)
+                self.data += list(cache['data'])
+                continue
+
             actions = sorted(os.listdir(subject_dir)) # Adding sorted for consistency
             print('Loading metadata for subject {} (0/{})'.format(subject, len(actions)), end='\r')
 
@@ -39,7 +47,7 @@ class H36MDataset(JointsDataset):
                 subject_data += self._get_action_data(subject, action, action_dir, annot, len(self.data) + len(subject_data))
                 print('Loading metadata for subject {} ({}/{})'.format(subject, i+1, len(actions)), end='\r')
             print()
-            np.savez('/app/dataset/H36M/gt/{}.npz'.format(subject), data=subject_data)
+            np.savez(cache_file, data=subject_data)
             self.data += subject_data
 
         self.data_num = len(self.data)
@@ -56,7 +64,7 @@ class H36MDataset(JointsDataset):
                 continue
             bbox = self.bb[subject][action][camera][frame-1]
             x1, y1, x2, y2 = (bbox[0], bbox[1], bbox[2], bbox[3])
-            markers =  [0, 1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 17, 18, 19, 25, 26, 27]
+            markers =  [1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 17, 18, 19, 25, 26, 27]
 
             img_id = '{}'.format(min_id + i)
             img_path = os.path.join(action_dir, 'imageSequence-undistorted', camera, 'img_%06d.jpg' % (frame,))
@@ -70,92 +78,6 @@ class H36MDataset(JointsDataset):
                 scale=scale,
             ))
         
-        return data
-
-    def _get_data(self):
-        data = list()
-
-        if self.stage == 'train':
-            coco = COCO(self.train_gt_path)
-        elif self.stage == 'val':
-            coco = COCO(self.val_gt_path)
-            self.val_gt = coco
-        else:
-            pass
-
-        if self.stage == 'train':
-            for aid, ann in coco.anns.items():
-                img_id = ann['image_id']
-                if img_id not in coco.imgs \
-                        or img_id in self._exception_ids:
-                    continue
-                
-                if ann['iscrowd']:
-                    continue
-
-                img_name = coco.imgs[img_id]['file_name']
-                prefix = 'val2014' if 'val' in img_name else 'train2014'
-                img_path = os.path.join(self.cur_dir, 'images', prefix,
-                        img_name)
-
-                bbox = np.array(ann['bbox'])
-                area = ann['area']
-                joints = np.array(ann['keypoints']).reshape((-1, 3))
-                headRect = np.array([0, 0, 1, 1], np.int32)
-
-                center, scale = self._bbox_to_center_and_scale(bbox)
-
-                if np.sum(joints[:, -1] > 0) < self.kp_load_min_num or \
-                        ann['num_keypoints'] == 0:
-                    continue
-
-                d = dict(aid=aid,
-                         area=area,
-                         bbox=bbox,
-                         center=center,
-                         headRect=headRect,
-                         img_id=img_id,
-                         img_name=img_name,
-                         img_path=img_path,
-                         joints=joints,
-                         scale=scale)
-                
-                data.append(d)
-
-        else:
-            if self.stage == 'val':
-                det_path = self.val_det_path
-            else:
-                det_path = self.test_det_path
-            dets = json.load(open(det_path))
-
-            for det in dets:
-                if det['image_id'] not in coco.imgs or det['category_id'] != 1:
-                    continue
-
-                img_id = det['image_id']
-                img_name = 'COCO_val2014_000000%06d.jpg' % img_id 
-                img_path = os.path.join(self.cur_dir, 'images', 'val2014',
-                        img_name)
-
-                bbox = np.array(det['bbox'])
-                center, scale = self._bbox_to_center_and_scale(bbox)
-                joints = np.zeros((self.keypoint_num, 3))
-                score = det['score']
-                headRect = np.array([0, 0, 1, 1], np.int32)
-
-                d = dict(bbox=bbox,
-                         center=center,
-                         headRect=headRect,
-                         img_id=img_id,
-                         img_name=img_name,
-                         img_path=img_path,
-                         joints=joints,
-                         scale=scale,
-                         score=score)
-
-                data.append(d)
-
         return data
 
     def _bbox_to_center_and_scale(self, bbox):
